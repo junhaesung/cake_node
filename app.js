@@ -6,6 +6,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 const request = require('request');
 const cron = require('node-cron');
+const FIREBASE_SERVER_KEY = require('./config/firebase').serverKey;
+const DATA_SERVICE_KEY = require('./config/data').serviceKey;
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -46,7 +48,6 @@ app.use(function(err, req, res, next) {
 });
 
 
-const FIREBASE_SERVER_KEY = require('./config/firebase').serverKey;
 
 /**
  * send message to mobile
@@ -76,10 +77,47 @@ function sendMessage(data = {}) {
   });
 }
 
+/**
+ * schedule job
+ */
 cron.schedule('*/10 * * * * *', () => {
   console.log('running a task every 10 seconds');
-  sendMessage();
+  // sendMessage();
 });
 
+/**
+ * 서울
+ */
+function findBusNoInSeoul() {
+  
+}
+
+/**
+ * 경기
+ */
+function findBusByNoInGyeonggi() {
+  
+}
+
+/**
+ * 서울, 경기 제외한 나머지. 일단 인천
+ */
+function findBusByNoInIncheon(busNo) {
+  const url = 'http://openapi.tago.go.kr/openapi/service/BusRouteInfoInqireService/getRouteNoList';
+  const serviceKey = DATA_SERVICE_KEY;
+  const cityCode = 23;  // 인천 cityCode
+  const routeNo = 1000;
+
+  return new promise((resolve, reject) => {
+    try {
+      request.get(`${url}?serviceKey=${DATA_SERVICE_KEY}&cityCode=${cityCode}&routeNo=${routeNo}`, (err, res, body) => {
+        console.log(body);
+        resolve(body);
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+}
 
 module.exports = app;
